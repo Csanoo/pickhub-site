@@ -143,6 +143,24 @@ form{display:flex;flex-direction:column;gap:18px}
 .result pre{margin:0;white-space:pre-wrap;font:400 14px/1.7 var(--mono);color:var(--ink)}
 .hint{font-size:14px;color:var(--muted)}
 
+.four{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(250px,100%),1fr));border:1px solid var(--line);background:var(--surface)}
+.four article{padding:28px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);margin:0 -1px -1px 0;display:flex;flex-direction:column;gap:10px}
+.four h3{font-size:19px}
+.four p{color:var(--muted);font-size:15px}
+.four .key{margin-top:auto;padding-top:12px;font-size:13px;font-weight:600;color:var(--ink)}
+.scroll{overflow-x:auto}
+.cmp{width:100%;min-width:560px;border-collapse:collapse;border-top:1px solid var(--ink);background:var(--surface)}
+.cmp th,.cmp td{text-align:left;padding:16px 20px;border-bottom:1px solid var(--line);font-size:15px;vertical-align:top}
+.cmp thead th{font-size:16px}
+.cmp tbody th{width:130px;font-weight:600}
+.cmp td{color:var(--muted)}
+.clients{list-style:none;margin:0;padding:0;border-top:1px solid var(--ink)}
+.clients li{display:flex;flex-wrap:wrap;gap:8px 32px;align-items:baseline;justify-content:space-between;padding:20px 0;border-bottom:1px solid var(--line)}
+.clients b{font-size:19px}
+.clients span{color:var(--muted);font-size:15px}
+.clients a{font-weight:600;font-size:15px;color:var(--accent);text-decoration:none}
+.clients a:hover{text-decoration:underline}
+
 .band{padding:64px 0;background:var(--rack);color:var(--rack-ink)}
 .band .wrap{display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:space-between}
 .band h2{font-size:clamp(24px,3.2vw,34px);max-width:620px}
@@ -231,6 +249,22 @@ footer .logo{color:var(--ink);font-size:15px}
   <section class="block">
     <div class="wrap">
       <div class="head">
+        <p class="mono">워크로드</p>
+        <h2>무엇을 돌리는지에 따라 서버 구성이 달라집니다.</h2>
+        <p>같은 예산이라도 용도가 다르면 힘을 실어야 할 곳이 다릅니다. 상담은 아래 네 가지 중 어디에 가까운지 확인하는 데서 시작합니다.</p>
+      </div>
+      <div class="four">
+        <article><h3>사내 문서 검색 · 업무 챗봇</h3><p>사내 자료를 근거로 답하는 LLM 서비스입니다. 학습보다 추론이 중심이고, 보안 때문에 내부망에 두는 경우가 많습니다.</p><span class="key">먼저 볼 것 · GPU 메모리, 동시 사용자 수</span></article>
+        <article><h3>영상 · 이미지 분석</h3><p>카메라 영상이나 검사 이미지를 실시간으로 판독합니다. 쉬지 않고 돌아가므로 안정성과 전력 효율이 중요합니다.</p><span class="key">먼저 볼 것 · 처리할 영상 수, 응답 시간</span></article>
+        <article><h3>모델 학습 · 파인튜닝</h3><p>여러 장의 GPU를 묶어 오래 돌립니다. GPU만큼 스토리지 속도와 노드 간 연결, 냉각이 결과를 좌우합니다.</p><span class="key">먼저 볼 것 · 데이터 규모, 학습 주기</span></article>
+        <article><h3>현장 · 엣지 AI</h3><p>공장이나 매장처럼 전산실이 아닌 곳에 설치합니다. 성능보다 크기, 소음, 온도 조건이 먼저 정해집니다.</p><span class="key">먼저 볼 것 · 설치 공간, 전원, 통신 환경</span></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="head">
         <p class="mono">일하는 방식</p>
         <h2>서버만 들여놓고 끝나는 프로젝트를 만들지 않습니다.</h2>
       </div>
@@ -240,6 +274,18 @@ footer .logo{color:var(--ink);font-size:15px}
         <div class="row"><h3>하드웨어와 소프트웨어를 같은 팀이 봅니다</h3><p>서버 업체와 개발 업체 사이에서 책임이 비는 구간이 생기지 않습니다. 장애가 나면 한 곳에 연락하면 됩니다.</p></div>
         <div class="row"><h3>운영할 사람에게 넘겨줍니다</h3><p>구성도, 계정 정책, 장애 대응 절차를 문서로 정리하고 담당자 교육까지 마친 뒤 인수인계합니다.</p></div>
       </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="head">
+        <p class="mono">고객사</p>
+        <h2>함께 일한 곳</h2>
+      </div>
+      <ul class="clients">
+        <li><b>(주)엑스디노드</b><span>GPU 서버 · 워크스테이션 공급</span><a href="https://www.xdnode.co.kr" target="_blank" rel="noopener">xdnode.co.kr →</a></li>
+      </ul>
     </div>
   </section>
 
@@ -282,6 +328,18 @@ footer .logo{color:var(--ink);font-size:15px}
       </div>
     </div>
   </section>
+  <section class="block">
+    <div class="wrap">
+      <div class="head">
+        <p class="mono">고객사</p>
+        <h2>함께 일한 곳</h2>
+      </div>
+      <ul class="clients">
+        <li><b>(주)엑스디노드</b><span>GPU 서버 · 워크스테이션 공급</span><a href="https://www.xdnode.co.kr" target="_blank" rel="noopener">xdnode.co.kr →</a></li>
+      </ul>
+    </div>
+  </section>
+
   <section class="band">
     <div class="wrap">
       <h2>어떤 일을 어디까지 하는지 확인해 보세요.</h2>
@@ -366,7 +424,7 @@ footer .logo{color:var(--ink);font-size:15px}
     <div class="wrap">
       <ol class="steps">
         <li><span class="n">01</span><h3>진단</h3><p>용도, 사용자, 데이터, 설치 장소, 예산 범위를 확인합니다.</p><span class="out">산출물 · 요구사항 정의서</span></li>
-        <li><span class="n">02</span><h3>설계</h3><p>장비 사양과 구성, 소프트웨어 구조를 정하고 대안을 비교합니다.</p><span class="out">산출물 · 구성 설계서, 견적</span></li>
+        <li><span class="n">02</span><h3>설계</h3><p>장비 사양과 구성을 정하고 대안을 비교합니다. 견적은 항목별로 나눠 공개합니다.</p><span class="out">산출물 · 구성 설계서, 견적</span></li>
         <li><span class="n">03</span><h3>구축</h3><p>장비 설치, 환경 세팅, 소프트웨어 개발을 일정에 맞춰 진행합니다.</p><span class="out">산출물 · 주간 진행 보고</span></li>
         <li><span class="n">04</span><h3>검증</h3><p>실제 워크로드로 성능과 안정성을 시험하고 미비점을 보완합니다.</p><span class="out">산출물 · 시험 결과서</span></li>
         <li><span class="n">05</span><h3>운영 이관</h3><p>운영 문서를 전달하고 담당자 교육을 진행합니다. 이후 유지보수로 이어집니다.</p><span class="out">산출물 · 운영 매뉴얼</span></li>
@@ -485,4 +543,21 @@ footer .logo{color:var(--ink);font-size:15px}
 })();
 </script>
 </body>
-</html>
+</html>    <section class="svc" style="display:block">
+      <p class="mono">구축 전 확인</p>
+      <h2>워크스테이션으로 충분할까, 서버가 필요할까</h2>
+      <p class="desc" style="max-width:640px;margin-bottom:28px">모든 경우에 랙 서버가 답은 아닙니다. 아래 기준으로 먼저 가르고, 필요한 쪽만 제안합니다.</p>
+      <div class="scroll">
+        <table class="cmp">
+          <thead><tr><th scope="col"><span class="mono">기준</span></th><th scope="col">GPU 워크스테이션</th><th scope="col">GPU 서버</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">설치 장소</th><td>사무실, 연구실 책상 옆</td><td>전산실이나 데이터센터의 랙</td></tr>
+            <tr><th scope="row">사용 방식</th><td>개인 또는 소규모 팀이 직접 사용</td><td>여러 사용자가 나눠 쓰고 24시간 가동</td></tr>
+            <tr><th scope="row">GPU 구성</th><td>한두 장으로 개발과 실험</td><td>여러 장을 한 대에 싣고 노드를 추가해 확장</td></tr>
+            <tr><th scope="row">전력 · 냉각</th><td>일반 전원과 실내 공조로 운용</td><td>전기 용량과 공조를 별도로 확보</td></tr>
+            <tr><th scope="row">운영</th><td>사용자가 직접 관리</td><td>스케줄러, 모니터링, 계정 정책이 필요</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
