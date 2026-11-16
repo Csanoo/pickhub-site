@@ -154,12 +154,6 @@ form{display:flex;flex-direction:column;gap:18px}
 .cmp thead th{font-size:16px}
 .cmp tbody th{width:130px;font-weight:600}
 .cmp td{color:var(--muted)}
-.clients{list-style:none;margin:0;padding:0;border-top:1px solid var(--ink)}
-.clients li{display:flex;flex-wrap:wrap;gap:8px 32px;align-items:baseline;justify-content:space-between;padding:20px 0;border-bottom:1px solid var(--line)}
-.clients b{font-size:19px}
-.clients span{color:var(--muted);font-size:15px}
-.clients a{font-weight:600;font-size:15px;color:var(--accent);text-decoration:none}
-.clients a:hover{text-decoration:underline}
 
 .band{padding:64px 0;background:var(--rack);color:var(--rack-ink)}
 .band .wrap{display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:space-between}
@@ -277,18 +271,6 @@ footer .logo{color:var(--ink);font-size:15px}
     </div>
   </section>
 
-  <section class="block">
-    <div class="wrap">
-      <div class="head">
-        <p class="mono">고객사</p>
-        <h2>함께 일한 곳</h2>
-      </div>
-      <ul class="clients">
-        <li><b>(주)엑스디노드</b><span>GPU 서버 · 워크스테이션 공급</span><a href="https://www.xdnode.co.kr" target="_blank" rel="noopener">xdnode.co.kr →</a></li>
-      </ul>
-    </div>
-  </section>
-
   <section class="band">
     <div class="wrap">
       <h2>아직 사양을 정하지 못했어도 괜찮습니다. 용도만 알려 주세요.</h2>
@@ -328,18 +310,6 @@ footer .logo{color:var(--ink);font-size:15px}
       </div>
     </div>
   </section>
-  <section class="block">
-    <div class="wrap">
-      <div class="head">
-        <p class="mono">고객사</p>
-        <h2>함께 일한 곳</h2>
-      </div>
-      <ul class="clients">
-        <li><b>(주)엑스디노드</b><span>GPU 서버 · 워크스테이션 공급</span><a href="https://www.xdnode.co.kr" target="_blank" rel="noopener">xdnode.co.kr →</a></li>
-      </ul>
-    </div>
-  </section>
-
   <section class="band">
     <div class="wrap">
       <h2>어떤 일을 어디까지 하는지 확인해 보세요.</h2>
@@ -372,6 +342,23 @@ footer .logo{color:var(--ink);font-size:15px}
         <li><b>LLM 서빙</b><span>사내망에서 동작하는 온프레미스 LLM 추론 서버 구성</span></li>
         <li><b>운영 준비</b><span>모니터링, 계정·자원 배분 정책, 운영 문서와 교육</span></li>
       </ul>
+    </section>
+    <section class="svc" style="display:block">
+      <p class="mono">구축 전 확인</p>
+      <h2>워크스테이션으로 충분할까, 서버가 필요할까</h2>
+      <p class="desc" style="max-width:640px;margin-bottom:28px">모든 경우에 랙 서버가 답은 아닙니다. 아래 기준으로 먼저 가르고, 필요한 쪽만 제안합니다.</p>
+      <div class="scroll">
+        <table class="cmp">
+          <thead><tr><th scope="col"><span class="mono">기준</span></th><th scope="col">GPU 워크스테이션</th><th scope="col">GPU 서버</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">설치 장소</th><td>사무실, 연구실 책상 옆</td><td>전산실이나 데이터센터의 랙</td></tr>
+            <tr><th scope="row">사용 방식</th><td>개인 또는 소규모 팀이 직접 사용</td><td>여러 사용자가 나눠 쓰고 24시간 가동</td></tr>
+            <tr><th scope="row">GPU 구성</th><td>한두 장으로 개발과 실험</td><td>여러 장을 한 대에 싣고 노드를 추가해 확장</td></tr>
+            <tr><th scope="row">전력 · 냉각</th><td>일반 전원과 실내 공조로 운용</td><td>전기 용량과 공조를 별도로 확보</td></tr>
+            <tr><th scope="row">운영</th><td>사용자가 직접 관리</td><td>스케줄러, 모니터링, 계정 정책이 필요</td></tr>
+          </tbody>
+        </table>
+      </div>
     </section>
     <section class="svc">
       <div>
@@ -543,21 +530,4 @@ footer .logo{color:var(--ink);font-size:15px}
 })();
 </script>
 </body>
-</html>    <section class="svc" style="display:block">
-      <p class="mono">구축 전 확인</p>
-      <h2>워크스테이션으로 충분할까, 서버가 필요할까</h2>
-      <p class="desc" style="max-width:640px;margin-bottom:28px">모든 경우에 랙 서버가 답은 아닙니다. 아래 기준으로 먼저 가르고, 필요한 쪽만 제안합니다.</p>
-      <div class="scroll">
-        <table class="cmp">
-          <thead><tr><th scope="col"><span class="mono">기준</span></th><th scope="col">GPU 워크스테이션</th><th scope="col">GPU 서버</th></tr></thead>
-          <tbody>
-            <tr><th scope="row">설치 장소</th><td>사무실, 연구실 책상 옆</td><td>전산실이나 데이터센터의 랙</td></tr>
-            <tr><th scope="row">사용 방식</th><td>개인 또는 소규모 팀이 직접 사용</td><td>여러 사용자가 나눠 쓰고 24시간 가동</td></tr>
-            <tr><th scope="row">GPU 구성</th><td>한두 장으로 개발과 실험</td><td>여러 장을 한 대에 싣고 노드를 추가해 확장</td></tr>
-            <tr><th scope="row">전력 · 냉각</th><td>일반 전원과 실내 공조로 운용</td><td>전기 용량과 공조를 별도로 확보</td></tr>
-            <tr><th scope="row">운영</th><td>사용자가 직접 관리</td><td>스케줄러, 모니터링, 계정 정책이 필요</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
+</html>
