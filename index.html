@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PICKHUB 홈페이지</title>
+<style>
+@font-face{font-family:"Pretendard";font-weight:45 920;font-style:normal;font-display:swap;src:url("fonts/PretendardVariable.woff2") format("woff2-variations")}
+/* layout idea: 서버 랙의 유닛(U) 단위를 페이지의 리듬으로 쓴다. 얇은 선, 모노 라벨, 한 가지 신호색. */
+:root{
+  --bg:#F2F4F1; --surface:#FFFFFF; --ink:#0F1F1B; --muted:#51605B; --line:#D3DAD5;
+  --accent:#C73E0A; --accent-ink:#FFFFFF; --rack:#11211D; --rack-line:#2B403A; --rack-ink:#DCE6E2; --rack-muted:#8FA39C; --led:#3DDC97;
+  --display:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1614; --surface:#15221F; --ink:#E9EFEC; --muted:#9DADA7; --line:#2A3A36;
+    --accent:#FF7A45; --accent-ink:#1A0E08; --rack:#070D0B; --rack-line:#26382F; --rack-ink:#DCE6E2; --rack-muted:#8FA39C;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1614; --surface:#15221F; --ink:#E9EFEC; --muted:#9DADA7; --line:#2A3A36;
+  --accent:#FF7A45; --accent-ink:#1A0E08; --rack:#070D0B; --rack-line:#26382F; --rack-ink:#DCE6E2; --rack-muted:#8FA39C;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.65;letter-spacing:-0.01em;word-break:keep-all;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+h1,h2,h3{font-family:var(--display);line-height:1.25;margin:0;text-wrap:balance;letter-spacing:-0.03em;font-weight:700}
+p{margin:0}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+.mono{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+/* header */
+header{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:24px;min-height:64px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:-0.01em}
+.logo-mark{width:22px;height:22px;display:grid;grid-template-rows:repeat(3,1fr);gap:3px}
+.logo-mark i{display:block;background:var(--ink);border-radius:1px}
+.logo-mark i:nth-child(2){background:var(--accent)}
+nav{display:flex;gap:4px;margin-left:auto;overflow-x:auto;max-width:100%}
+nav a{text-decoration:none;padding:10px 14px;font-size:15px;font-weight:500;color:var(--muted);white-space:nowrap;border-bottom:2px solid transparent}
+nav a:hover{color:var(--ink)}
+nav a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent)}
+
+.btn{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 22px;background:var(--accent);color:var(--accent-ink);font:600 15px var(--body);text-decoration:none;border:0;border-radius:2px;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+.btn.ghost:hover{background:var(--ink);color:var(--bg);filter:none}
+
+/* views */
+.js [data-view]{display:none}
+.js [data-view].on{display:block}
+section.block{padding:72px 0;border-bottom:1px solid var(--line)}
+.head{display:flex;flex-direction:column;gap:12px;margin-bottom:40px;max-width:720px}
+.head h2{font-size:clamp(26px,3.4vw,38px)}
+.head p{color:var(--muted)}
+.page-top{padding:64px 0 48px;border-bottom:1px solid var(--line)}
+.page-top h1{font-size:clamp(32px,4.6vw,52px);margin:12px 0 16px}
+.page-top p{color:var(--muted);max-width:640px}
+
+/* hero */
+.hero{padding:64px 0 72px;border-bottom:1px solid var(--line)}
+.hero-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr));gap:56px;align-items:center}
+.hero h1{font-size:clamp(34px,5.2vw,60px);margin:16px 0 20px}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero .lead{font-size:18px;color:var(--muted);max-width:520px}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:32px}
+
+/* rack */
+.rack{background:var(--rack);border:1px solid var(--rack-line);border-radius:4px;padding:14px;color:var(--rack-ink)}
+.rack-top{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--rack-muted);padding:2px 4px 12px}
+.units{display:flex;flex-direction:column;gap:6px}
+.unit{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:12px;width:100%;min-height:44px;padding:0 12px;background:transparent;border:1px solid var(--rack-line);border-radius:2px;color:var(--rack-ink);font:500 14px var(--body);text-align:left;cursor:pointer}
+.unit.tall{min-height:58px}
+.unit:hover{border-color:var(--rack-muted)}
+.unit[aria-pressed="true"]{border-color:#FF7A45;background:rgba(255,122,69,.12)}
+.unit .u{font-family:var(--mono);font-size:11px;color:var(--rack-muted)}
+.leds{display:flex;gap:5px}
+.leds i{width:6px;height:6px;border-radius:50%;background:var(--led)}
+.leds i:nth-child(2){animation:blink 2.4s infinite}
+.leds i.amber{background:#FFB454;animation:blink 1.1s infinite}
+@keyframes blink{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.leds i{animation:none!important}html{scroll-behavior:auto}}
+.rack-note{margin-top:12px;padding:14px;border-top:1px solid var(--rack-line);min-height:104px}
+.rack-note b{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:#FF7A45;margin-bottom:6px}
+.rack-note span{font-size:14px;line-height:1.65;color:var(--rack-ink)}
+
+/* cards & rows */
+.three{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:0;border:1px solid var(--line);background:var(--surface)}
+.three article{padding:32px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);margin:0 -1px -1px 0;display:flex;flex-direction:column;gap:14px}
+.three h3{font-size:22px}
+.three p{color:var(--muted);font-size:15px}
+.three a{margin-top:auto;font-weight:600;font-size:15px;color:var(--accent);text-decoration:none}
+.three a:hover{text-decoration:underline}
+.rows{border-top:1px solid var(--ink)}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:8px 40px;padding:24px 0;border-bottom:1px solid var(--line)}
+.row h3{font-size:19px}
+.row p{color:var(--muted);font-size:15px}
+
+/* service detail */
+.svc{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));gap:32px 64px;padding:56px 0;border-bottom:1px solid var(--line)}
+.svc h2{font-size:clamp(24px,3vw,32px);margin:10px 0 14px}
+.svc .desc{color:var(--muted)}
+.list{list-style:none;margin:0;padding:0;border-top:1px solid var(--ink)}
+.list li{display:grid;grid-template-columns:minmax(110px,150px) 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--line);font-size:15px}
+.list li b{font-weight:600}
+.list li span{color:var(--muted)}
+
+/* process */
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));gap:0;border:1px solid var(--line);background:var(--surface)}
+.steps li{padding:24px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);margin:0 -1px -1px 0;display:flex;flex-direction:column;gap:8px}
+.steps .n{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:600}
+.steps h3{font-size:18px}
+.steps p{font-size:14px;color:var(--muted)}
+.steps .out{margin-top:auto;padding-top:12px;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted)}
+
+/* about */
+.facts{width:100%;border-collapse:collapse;border-top:1px solid var(--ink)}
+.facts th,.facts td{text-align:left;padding:16px 0;border-bottom:1px solid var(--line);font-size:15px;vertical-align:top}
+.facts th{width:140px;font-weight:600}
+.facts td{color:var(--muted)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:48px 64px}
+.prose{display:flex;flex-direction:column;gap:18px;max-width:560px}
+.prose h2{font-size:clamp(24px,3vw,32px)}
+.prose p{color:var(--muted)}
+
+/* contact */
+form{display:flex;flex-direction:column;gap:18px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:14px;font-weight:600}
+.field input,.field select,.field textarea{width:100%;min-height:48px;padding:10px 12px;font:400 16px var(--body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:2px}
+.field textarea{min-height:140px;resize:vertical}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:18px}
+.result{display:none;flex-direction:column;gap:12px;padding:20px;border:1px solid var(--accent);background:var(--surface)}
+.result.on{display:flex}
+.result pre{margin:0;white-space:pre-wrap;font:400 14px/1.7 var(--mono);color:var(--ink)}
+.hint{font-size:14px;color:var(--muted)}
+
+.band{padding:64px 0;background:var(--rack);color:var(--rack-ink)}
+.band .wrap{display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:space-between}
+.band h2{font-size:clamp(24px,3.2vw,34px);max-width:620px}
+.band .btn{background:#FF7A45;color:#1A0E08}
+
+footer{padding:40px 0 56px;font-size:14px;color:var(--muted)}
+footer .wrap{display:flex;flex-wrap:wrap;gap:16px 48px;justify-content:space-between}
+footer .logo{color:var(--ink);font-size:15px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap bar">
+    <a class="logo" href="#home" aria-label="PICKHUB 홈">
+      <span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i></span>PICKHUB
+    </a>
+    <nav aria-label="주 메뉴">
+      <a href="#home" data-nav="home">홈</a>
+      <a href="#about" data-nav="about">회사소개</a>
+      <a href="#services" data-nav="services">사업분야</a>
+      <a href="#process" data-nav="process">진행 절차</a>
+      <a href="#contact" data-nav="contact">문의</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<!-- ================= 홈 ================= -->
+<div data-view="home" class="on">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="mono">AI Infrastructure · Consulting · System Integration</p>
+        <h1>AI 서버, <em>고르는 일</em>부터 돌리는 일까지 한 곳에서.</h1>
+        <p class="lead">PICKHUB은 AI 서버 구축, AI 도입 컨설팅, 소프트웨어 SI를 한 팀이 수행합니다. 장비 선정에서 업무 시스템 연동까지 창구를 나누지 않습니다.</p>
+        <div class="cta">
+          <a class="btn" href="#contact">구축 상담 요청</a>
+          <a class="btn ghost" href="#services">사업분야 보기</a>
+        </div>
+      </div>
+
+      <div class="rack" aria-label="AI 서버 랙 구성 예시">
+        <div class="rack-top"><span>RACK 01 · 구성 예시</span><span>유닛을 눌러 보세요</span></div>
+        <div class="units">
+          <button type="button" class="unit" aria-pressed="false" data-t="네트워크 스위치" data-d="노드 간 학습 트래픽과 스토리지 트래픽을 분리해 설계합니다. 워크로드 규모에 따라 고속 이더넷과 InfiniBand 중 맞는 쪽을 고릅니다."><span class="u">U42</span><span>네트워크 스위치</span><span class="leds" aria-hidden="true"><i></i><i></i><i></i></span></button>
+          <button type="button" class="unit tall" aria-pressed="true" data-t="GPU 노드" data-d="학습용인지 추론용인지, 모델 크기와 동시 사용자 수가 어느 정도인지부터 확인합니다. 그 결과로 GPU 종류와 수량, 메모리, 전력 요구량을 산정합니다."><span class="u">U30</span><span>GPU 노드 01–02</span><span class="leds" aria-hidden="true"><i></i><i></i><i class="amber"></i></span></button>
+          <button type="button" class="unit tall" aria-pressed="false" data-t="GPU 노드 (증설 슬롯)" data-d="처음부터 최대 사양으로 채우지 않습니다. 전력과 냉각 여유를 계산해 두고, 사용량이 늘 때 같은 랙에 노드를 추가할 수 있게 구성합니다."><span class="u">U22</span><span>GPU 노드 03–04</span><span class="leds" aria-hidden="true"><i></i><i></i><i class="amber"></i></span></button>
+          <button type="button" class="unit" aria-pressed="false" data-t="스토리지" data-d="데이터셋과 모델 체크포인트를 담는 공유 스토리지입니다. 읽기 속도가 GPU를 놀리지 않도록 용량과 처리량을 함께 설계합니다."><span class="u">U14</span><span>스토리지</span><span class="leds" aria-hidden="true"><i></i><i></i></span></button>
+          <button type="button" class="unit" aria-pressed="false" data-t="관리 노드" data-d="작업 스케줄러, 컨테이너 환경, 사용자 계정, 모니터링을 올립니다. 여러 사람이 GPU를 나눠 쓸 때 충돌 없이 배분되도록 정책을 잡습니다."><span class="u">U10</span><span>관리 노드</span><span class="leds" aria-hidden="true"><i></i><i></i></span></button>
+          <button type="button" class="unit" aria-pressed="false" data-t="전원 · 냉각" data-d="GPU 서버는 일반 서버보다 전력과 발열이 큽니다. 설치 장소의 전기 용량과 공조 조건을 먼저 확인하고, 부족하면 대안을 함께 제시합니다."><span class="u">U01</span><span>전원 · 냉각</span><span class="leds" aria-hidden="true"><i></i></span></button>
+        </div>
+        <div class="rack-note" aria-live="polite"><b id="rackT">GPU 노드</b><span id="rackD">학습용인지 추론용인지, 모델 크기와 동시 사용자 수가 어느 정도인지부터 확인합니다. 그 결과로 GPU 종류와 수량, 메모리, 전력 요구량을 산정합니다.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="head">
+        <p class="mono">사업분야</p>
+        <h2>인프라, 방향, 소프트웨어. 세 가지를 따로 맡기지 않아도 됩니다.</h2>
+      </div>
+      <div class="three">
+        <article>
+          <p class="mono">01 · Infrastructure</p>
+          <h3>AI 서버 구축</h3>
+          <p>GPU 서버 사양 설계와 장비 선정, 설치, 학습·추론 환경 세팅까지 수행합니다. 사내에 두는 온프레미스 LLM 서버도 구축합니다.</p>
+          <a href="#services">구축 범위 보기 →</a>
+        </article>
+        <article>
+          <p class="mono">02 · Consulting</p>
+          <h3>AI 컨설팅</h3>
+          <p>AI를 어디에 쓸지, 서버를 살지 빌릴지, 어느 모델이 맞는지를 장비를 사기 전에 정리합니다. 작은 검증(PoC)으로 먼저 확인합니다.</p>
+          <a href="#services">컨설팅 범위 보기 →</a>
+        </article>
+        <article>
+          <p class="mono">03 · System Integration</p>
+          <h3>SW SI</h3>
+          <p>업무 시스템을 설계하고 개발합니다. 기존 시스템과의 연동, 데이터 이관, AI 기능을 실제 업무 화면에 붙이는 일까지 맡습니다.</p>
+          <a href="#services">개발 범위 보기 →</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="head">
+        <p class="mono">일하는 방식</p>
+        <h2>서버만 들여놓고 끝나는 프로젝트를 만들지 않습니다.</h2>
+      </div>
+      <div class="rows">
+        <div class="row"><h3>용도부터 묻습니다</h3><p>장비 견적보다 먼저 무엇을 돌릴지 확인합니다. 사양은 워크로드에서 나오고, 과한 사양은 그대로 비용이 됩니다.</p></div>
+        <div class="row"><h3>특정 제조사에 묶이지 않습니다</h3><p>요구 조건에 맞는 장비와 소프트웨어를 비교해 고릅니다. 선택한 이유와 탈락시킨 이유를 문서로 남깁니다.</p></div>
+        <div class="row"><h3>하드웨어와 소프트웨어를 같은 팀이 봅니다</h3><p>서버 업체와 개발 업체 사이에서 책임이 비는 구간이 생기지 않습니다. 장애가 나면 한 곳에 연락하면 됩니다.</p></div>
+        <div class="row"><h3>운영할 사람에게 넘겨줍니다</h3><p>구성도, 계정 정책, 장애 대응 절차를 문서로 정리하고 담당자 교육까지 마친 뒤 인수인계합니다.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <h2>아직 사양을 정하지 못했어도 괜찮습니다. 용도만 알려 주세요.</h2>
+      <a class="btn" href="#contact">구축 상담 요청</a>
+    </div>
+  </section>
+</div>
+
+<!-- ================= 회사소개 ================= -->
+<div data-view="about">
+  <section class="page-top">
+    <div class="wrap">
+      <p class="mono">회사소개</p>
+      <h1>맞는 것을 고르고, 한 곳으로 모읍니다.</h1>
+      <p>PICKHUB이라는 이름은 하는 일을 그대로 담았습니다. 수많은 장비와 모델, 기술 가운데 고객에게 맞는 것을 고르고(Pick), 흩어진 인프라와 소프트웨어를 하나로 연결합니다(Hub).</p>
+    </div>
+  </section>
+  <section class="block">
+    <div class="wrap two">
+      <div class="prose">
+        <h2>AI 도입이 장비 구매에서 멈추지 않도록</h2>
+        <p>GPU 서버를 들여놓았지만 환경이 잡히지 않아 쓰지 못하거나, 모델은 돌아가는데 업무 시스템에 붙이지 못하는 경우가 많습니다. 인프라와 소프트웨어를 서로 다른 업체가 맡으면 그 사이가 비기 쉽습니다.</p>
+        <p>PICKHUB은 AI 서버 구축과 컨설팅, 소프트웨어 SI를 함께 수행하는 회사입니다. 서버가 켜지는 것이 아니라 업무에서 쓰이는 것을 프로젝트의 끝으로 봅니다.</p>
+      </div>
+      <div>
+        <table class="facts">
+          <tbody>
+            <tr><th scope="row">회사명</th><td>PICKHUB (사업자 상호: 선)</td></tr>
+            <tr><th scope="row">대표</th><td>최선우</td></tr>
+            <tr><th scope="row">설립</th><td>2025년 1월</td></tr>
+            <tr><th scope="row">사업분야</th><td>AI 서버 구축, AI 컨설팅, 소프트웨어 SI</td></tr>
+            <tr><th scope="row">대표 이메일</th><td><a href="mailto:admin@pickhub.site">admin@pickhub.site</a></td></tr>
+            <tr><th scope="row">주소</th><td>서울특별시 동대문구 한천로46길 42</td></tr>
+            <tr><th scope="row">사업자등록번호</th><td>177-09-03028</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  <section class="band">
+    <div class="wrap">
+      <h2>어떤 일을 어디까지 하는지 확인해 보세요.</h2>
+      <a class="btn" href="#services">사업분야 보기</a>
+    </div>
+  </section>
+</div>
+
+<!-- ================= 사업분야 ================= -->
+<div data-view="services">
+  <section class="page-top">
+    <div class="wrap">
+      <p class="mono">사업분야</p>
+      <h1>세 가지 일, 하나의 팀.</h1>
+      <p>한 가지만 맡기셔도 되고, 컨설팅에서 구축, 개발까지 이어서 맡기셔도 됩니다.</p>
+    </div>
+  </section>
+  <div class="wrap">
+    <section class="svc">
+      <div>
+        <p class="mono">01 · Infrastructure</p>
+        <h2>AI 서버 구축</h2>
+        <p class="desc">학습과 추론에 쓰는 GPU 서버를 설계하고 설치합니다. 전원을 넣는 데서 끝내지 않고, 작업을 바로 올릴 수 있는 상태로 넘겨드립니다.</p>
+      </div>
+      <ul class="list">
+        <li><b>사양 설계</b><span>워크로드 분석, GPU·CPU·메모리 산정, 장비 비교와 선정</span></li>
+        <li><b>설치 환경</b><span>랙 배치, 전력 용량과 냉각 조건 검토</span></li>
+        <li><b>네트워크·스토리지</b><span>노드 간 고속 네트워크, 공유 스토리지 구성</span></li>
+        <li><b>소프트웨어 환경</b><span>OS, GPU 드라이버, 컨테이너, 작업 스케줄러 설치</span></li>
+        <li><b>LLM 서빙</b><span>사내망에서 동작하는 온프레미스 LLM 추론 서버 구성</span></li>
+        <li><b>운영 준비</b><span>모니터링, 계정·자원 배분 정책, 운영 문서와 교육</span></li>
+      </ul>
+    </section>
+    <section class="svc">
+      <div>
+        <p class="mono">02 · Consulting</p>
+        <h2>AI 컨설팅</h2>
+        <p class="desc">장비나 솔루션을 계약하기 전에 결정해야 할 것들을 정리합니다. 결과물은 의사결정에 바로 쓸 수 있는 문서로 드립니다.</p>
+      </div>
+      <ul class="list">
+        <li><b>도입 검토</b><span>AI를 적용할 업무 선정, 기대 효과와 선행 조건 정리</span></li>
+        <li><b>용량 산정</b><span>사용자 수와 모델 규모에 따른 필요 자원 계산</span></li>
+        <li><b>구축 방식 비교</b><span>클라우드, 온프레미스, 혼합 구성의 비용과 제약 비교</span></li>
+        <li><b>모델·구조 선정</b><span>오픈소스·상용 모델 비교, RAG 등 서비스 구조 설계</span></li>
+        <li><b>보안 환경</b><span>망분리, 데이터 반출 제한 환경에서의 구성 방안</span></li>
+        <li><b>PoC</b><span>작은 규모로 먼저 만들어 성능과 실효성 검증</span></li>
+      </ul>
+    </section>
+    <section class="svc">
+      <div>
+        <p class="mono">03 · System Integration</p>
+        <h2>SW SI</h2>
+        <p class="desc">요구사항 정의부터 설계, 개발, 오픈, 유지보수까지 수행합니다. AI 서버 위에서 돌아가는 기능을 실제 업무 화면으로 만드는 일이 강점입니다.</p>
+      </div>
+      <ul class="list">
+        <li><b>업무 시스템</b><span>사내 업무 시스템, 관리자 도구 설계와 개발</span></li>
+        <li><b>웹·모바일</b><span>서비스 프런트엔드와 백엔드, API 개발</span></li>
+        <li><b>연동·이관</b><span>기존 시스템 연계, 데이터베이스 이관</span></li>
+        <li><b>AI 기능 통합</b><span>사내 문서 검색, 업무 챗봇 등 AI 기능을 기존 시스템에 연결</span></li>
+        <li><b>유지보수</b><span>오픈 후 장애 대응, 기능 개선, 운영 지원</span></li>
+      </ul>
+    </section>
+  </div>
+  <section class="band">
+    <div class="wrap">
+      <h2>필요한 범위가 어디까지인지 같이 정리해 드립니다.</h2>
+      <a class="btn" href="#contact">구축 상담 요청</a>
+    </div>
+  </section>
+</div>
+
+<!-- ================= 진행 절차 ================= -->
+<div data-view="process">
+  <section class="page-top">
+    <div class="wrap">
+      <p class="mono">진행 절차</p>
+      <h1>다섯 단계, 단계마다 남는 문서.</h1>
+      <p>각 단계가 끝나면 산출물을 드리고 확인을 받은 뒤 다음 단계로 넘어갑니다.</p>
+    </div>
+  </section>
+  <section class="block">
+    <div class="wrap">
+      <ol class="steps">
+        <li><span class="n">01</span><h3>진단</h3><p>용도, 사용자, 데이터, 설치 장소, 예산 범위를 확인합니다.</p><span class="out">산출물 · 요구사항 정의서</span></li>
+        <li><span class="n">02</span><h3>설계</h3><p>장비 사양과 구성, 소프트웨어 구조를 정하고 대안을 비교합니다.</p><span class="out">산출물 · 구성 설계서, 견적</span></li>
+        <li><span class="n">03</span><h3>구축</h3><p>장비 설치, 환경 세팅, 소프트웨어 개발을 일정에 맞춰 진행합니다.</p><span class="out">산출물 · 주간 진행 보고</span></li>
+        <li><span class="n">04</span><h3>검증</h3><p>실제 워크로드로 성능과 안정성을 시험하고 미비점을 보완합니다.</p><span class="out">산출물 · 시험 결과서</span></li>
+        <li><span class="n">05</span><h3>운영 이관</h3><p>운영 문서를 전달하고 담당자 교육을 진행합니다. 이후 유지보수로 이어집니다.</p><span class="out">산출물 · 운영 매뉴얼</span></li>
+      </ol>
+    </div>
+  </section>
+  <section class="band">
+    <div class="wrap">
+      <h2>첫 단계는 상담입니다. 용도를 알려 주시면 진단부터 시작합니다.</h2>
+      <a class="btn" href="#contact">구축 상담 요청</a>
+    </div>
+  </section>
+</div>
+
+<!-- ================= 문의 ================= -->
+<div data-view="contact">
+  <section class="page-top">
+    <div class="wrap">
+      <p class="mono">문의</p>
+      <h1>무엇을 돌리려는지 알려 주세요.</h1>
+      <p>사양이나 예산이 정해지지 않았어도 됩니다. 아는 만큼만 적어 주시면 확인 후 연락드립니다.</p>
+    </div>
+  </section>
+  <section class="block">
+    <div class="wrap two">
+      <div>
+        <form id="inq" novalidate>
+          <div class="pair">
+            <div class="field"><label for="f-company">회사명</label><input id="f-company" name="company" autocomplete="organization" required></div>
+            <div class="field"><label for="f-name">담당자</label><input id="f-name" name="name" autocomplete="name" required></div>
+          </div>
+          <div class="pair">
+            <div class="field"><label for="f-email">이메일</label><input id="f-email" name="email" type="email" autocomplete="email" required></div>
+            <div class="field"><label for="f-tel">연락처</label><input id="f-tel" name="tel" type="tel" autocomplete="tel"></div>
+          </div>
+          <div class="field"><label for="f-type">문의 분야</label>
+            <select id="f-type" name="type">
+              <option>AI 서버 구축</option><option>AI 컨설팅</option><option>SW SI</option><option>아직 잘 모르겠음</option>
+            </select>
+          </div>
+          <div class="field"><label for="f-msg">문의 내용</label><textarea id="f-msg" name="msg" placeholder="예: 사내 문서 검색용 LLM을 내부망에 두고 싶습니다. 사용자는 약 50명입니다." required></textarea></div>
+          <p class="hint" id="f-err" role="alert"></p>
+          <div><button class="btn" type="submit">문의 내용 정리하기</button></div>
+        </form>
+        <div class="result" id="result">
+          <p><b>문의 내용이 정리되었습니다.</b> 아래 내용을 복사해 <a href="mailto:contact@pickhub.site">contact@pickhub.site</a>로 보내 주세요.</p>
+          <pre id="resultText"></pre>
+          <div><button class="btn ghost" type="button" id="copyBtn">내용 복사</button></div>
+        </div>
+      </div>
+      <div>
+        <table class="facts">
+          <tbody>
+            <tr><th scope="row">문의 메일</th><td><a href="mailto:contact@pickhub.site">contact@pickhub.site</a></td></tr>
+            <tr><th scope="row">주소</th><td>서울특별시 동대문구 한천로46길 42</td></tr>
+            <tr><th scope="row">상담 시간</th><td>09:00 – 18:00</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="logo" href="#home"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i></span>PICKHUB</a>
+    <span>AI 서버 구축 · AI 컨설팅 · SW SI</span>
+    <span>서울특별시 동대문구 한천로46길 42 · contact@pickhub.site · 사업자등록번호 177-09-03028</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  document.documentElement.classList.add('js');
+  var views=['home','about','services','process','contact'];
+  function show(){
+    var h=(location.hash||'').replace('#','');
+    if(views.indexOf(h)<0) h='home';
+    document.querySelectorAll('[data-view]').forEach(function(v){v.classList.toggle('on',v.getAttribute('data-view')===h)});
+    document.querySelectorAll('[data-nav]').forEach(function(a){
+      if(a.getAttribute('data-nav')===h) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
+    });
+    window.scrollTo(0,0);
+  }
+  window.addEventListener('hashchange',show);
+  show();
+
+  var units=document.querySelectorAll('.unit'),t=document.getElementById('rackT'),d=document.getElementById('rackD');
+  units.forEach(function(u){u.addEventListener('click',function(){
+    units.forEach(function(x){x.setAttribute('aria-pressed','false')});
+    u.setAttribute('aria-pressed','true');
+    t.textContent=u.getAttribute('data-t'); d.textContent=u.getAttribute('data-d');
+  })});
+
+  var form=document.getElementById('inq'),err=document.getElementById('f-err'),res=document.getElementById('result'),out=document.getElementById('resultText'),copy=document.getElementById('copyBtn');
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var f=form.elements;
+    if(!f.company.value.trim()||!f.name.value.trim()||!f.email.value.trim()||!f.msg.value.trim()){
+      err.textContent='회사명, 담당자, 이메일, 문의 내용을 입력해 주세요.'; res.classList.remove('on'); return;
+    }
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email.value.trim())){
+      err.textContent='이메일 주소 형식을 확인해 주세요.'; res.classList.remove('on'); return;
+    }
+    err.textContent='';
+    out.textContent='[PICKHUB 문의]\n회사명: '+f.company.value.trim()+'\n담당자: '+f.name.value.trim()+'\n이메일: '+f.email.value.trim()+'\n연락처: '+(f.tel.value.trim()||'-')+'\n문의 분야: '+f.type.value+'\n\n'+f.msg.value.trim();
+    res.classList.add('on');
+    copy.textContent='내용 복사';
+  });
+  copy.addEventListener('click',function(){
+    try{
+      navigator.clipboard.writeText(out.textContent).then(function(){copy.textContent='복사했습니다'},function(){copy.textContent='복사하지 못했습니다. 직접 선택해 복사해 주세요'});
+    }catch(e){copy.textContent='복사하지 못했습니다. 직접 선택해 복사해 주세요'}
+  });
+})();
+</script>
+</body>
+</html>
