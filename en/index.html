@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PICKHUB — AI Server Build, Consulting, System Integration</title>
+<style>
+@font-face{font-family:"Pretendard";font-weight:45 920;font-style:normal;font-display:swap;src:url("../fonts/PretendardVariable.woff2") format("woff2-variations")}
+/* layout: the rack unit (U) sets the rhythm of the page. Thin rules, small labels, one signal colour. */
+:root{
+  --bg:#F2F4F1; --surface:#FFFFFF; --ink:#0F1F1B; --muted:#51605B; --line:#D3DAD5;
+  --accent:#C73E0A; --accent-ink:#FFFFFF; --rack:#11211D; --rack-line:#2B403A; --rack-ink:#DCE6E2; --rack-muted:#8FA39C; --led:#3DDC97;
+  --display:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1614; --surface:#15221F; --ink:#E9EFEC; --muted:#9DADA7; --line:#2A3A36;
+    --accent:#FF7A45; --accent-ink:#1A0E08; --rack:#070D0B; --rack-line:#26382F; --rack-ink:#DCE6E2; --rack-muted:#8FA39C;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1614; --surface:#15221F; --ink:#E9EFEC; --muted:#9DADA7; --line:#2A3A36;
+  --accent:#FF7A45; --accent-ink:#1A0E08; --rack:#070D0B; --rack-line:#26382F; --rack-ink:#DCE6E2; --rack-muted:#8FA39C;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.65;letter-spacing:-0.01em;word-break:normal;overflow-wrap:break-word;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+h1,h2,h3{font-family:var(--display);line-height:1.25;margin:0;text-wrap:balance;letter-spacing:-0.03em;font-weight:700}
+p{margin:0}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+.mono{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+/* header */
+header{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:24px;min-height:64px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:-0.01em}
+.logo-mark{width:22px;height:22px;display:grid;grid-template-rows:repeat(3,1fr);gap:3px}
+.logo-mark i{display:block;background:var(--ink);border-radius:1px}
+.logo-mark i:nth-child(2){background:var(--accent)}
+nav{display:flex;gap:4px;margin-left:auto;overflow-x:auto;max-width:100%}
+nav a{text-decoration:none;padding:10px 14px;font-size:15px;font-weight:500;color:var(--muted);white-space:nowrap;border-bottom:2px solid transparent}
+nav a:hover{color:var(--ink)}
+nav a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent)}
+
+.btn{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 22px;background:var(--accent);color:var(--accent-ink);font:600 15px var(--body);text-decoration:none;border:0;border-radius:2px;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+.btn.ghost:hover{background:var(--ink);color:var(--bg);filter:none}
+
+/* views */
+.js [data-view]{display:none}
+.js [data-view].on{display:block}
+section.block{padding:72px 0;border-bottom:1px solid var(--line)}
+.head{display:flex;flex-direction:column;gap:12px;margin-bottom:40px;max-width:720px}
+.head h2{font-size:clamp(26px,3.4vw,38px)}
+.head p{color:var(--muted)}
+.page-top{padding:64px 0 48px;border-bottom:1px solid var(--line)}
+.page-top h1{font-size:clamp(32px,4.6vw,52px);margin:12px 0 16px}
+.page-top p{color:var(--muted);max-width:640px}
+
+/* hero */
+.hero{padding:64px 0 72px;border-bottom:1px solid var(--line)}
+.hero-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr));gap:56px;align-items:center}
+.hero h1{font-size:clamp(34px,5.2vw,60px);margin:16px 0 20px}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero .lead{font-size:18px;color:var(--muted);max-width:520px}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:32px}
+
+/* rack */
+.rack{background:var(--rack);border:1px solid var(--rack-line);border-radius:4px;padding:14px;color:var(--rack-ink)}
+.rack-top{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--rack-muted);padding:2px 4px 12px}
+.units{display:flex;flex-direction:column;gap:6px}
+.unit{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:12px;width:100%;min-height:44px;padding:0 12px;background:transparent;border:1px solid var(--rack-line);border-radius:2px;color:var(--rack-ink);font:500 14px var(--body);text-align:left;cursor:pointer}
+.unit.tall{min-height:58px}
+.unit:hover{border-color:var(--rack-muted)}
+.unit[aria-pressed="true"]{border-color:#FF7A45;background:rgba(255,122,69,.12)}
+.unit .u{font-family:var(--mono);font-size:11px;color:var(--rack-muted)}
+.leds{display:flex;gap:5px}
+.leds i{width:6px;height:6px;border-radius:50%;background:var(--led)}
+.leds i:nth-child(2){animation:blink 2.4s infinite}
+.leds i.amber{background:#FFB454;animation:blink 1.1s infinite}
+@keyframes blink{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.leds i{animation:none!important}html{scroll-behavior:auto}}
+.rack-note{margin-top:12px;padding:14px;border-top:1px solid var(--rack-line);min-height:104px}
+.rack-note b{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:#FF7A45;margin-bottom:6px}
+.rack-note span{font-size:14px;line-height:1.65;color:var(--rack-ink)}
+
+/* cards & rows */
+.three{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:0;border:1px solid var(--line);background:var(--surface)}
+.three article{padding:32px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);margin:0 -1px -1px 0;display:flex;flex-direction:column;gap:14px}
+.three h3{font-size:22px}
+.three p{color:var(--muted);font-size:15px}
+.three a{margin-top:auto;font-weight:600;font-size:15px;color:var(--accent);text-decoration:none}
+.three a:hover{text-decoration:underline}
+.rows{border-top:1px solid var(--ink)}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:8px 40px;padding:24px 0;border-bottom:1px solid var(--line)}
+.row h3{font-size:19px}
+.row p{color:var(--muted);font-size:15px}
+
+/* service detail */
+.svc{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));gap:32px 64px;padding:56px 0;border-bottom:1px solid var(--line)}
+.svc h2{font-size:clamp(24px,3vw,32px);margin:10px 0 14px}
+.svc .desc{color:var(--muted)}
+.list{list-style:none;margin:0;padding:0;border-top:1px solid var(--ink)}
+.list li{display:grid;grid-template-columns:minmax(110px,150px) 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--line);font-size:15px}
+.list li b{font-weight:600}
+.list li span{color:var(--muted)}
+
+/* process */
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));gap:0;border:1px solid var(--line);background:var(--surface)}
+.steps li{padding:24px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);margin:0 -1px -1px 0;display:flex;flex-direction:column;gap:8px}
+.steps .n{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:600}
+.steps h3{font-size:18px}
+.steps p{font-size:14px;color:var(--muted)}
+.steps .out{margin-top:auto;padding-top:12px;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted)}
+
+/* about */
+.facts{width:100%;border-collapse:collapse;border-top:1px solid var(--ink)}
+.facts th,.facts td{text-align:left;padding:16px 0;border-bottom:1px solid var(--line);font-size:15px;vertical-align:top}
+.facts th{width:140px;font-weight:600}
+.facts td{color:var(--muted)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:48px 64px}
+.prose{display:flex;flex-direction:column;gap:18px;max-width:560px}
+.prose h2{font-size:clamp(24px,3vw,32px)}
+.prose p{color:var(--muted)}
+
+/* contact */
+form{display:flex;flex-direction:column;gap:18px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:14px;font-weight:600}
+.field input,.field select,.field textarea{width:100%;min-height:48px;padding:10px 12px;font:400 16px var(--body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:2px}
+.field textarea{min-height:140px;resize:vertical}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:18px}
+.result{display:none;flex-direction:column;gap:12px;padding:20px;border:1px solid var(--accent);background:var(--surface)}
+.result.on{display:flex}
+.result pre{margin:0;white-space:pre-wrap;font:400 14px/1.7 var(--mono);color:var(--ink)}
+.hint{font-size:14px;color:var(--muted)}
+
+.four{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(250px,100%),1fr));border:1px solid var(--line);background:var(--surface)}
+.four article{padding:28px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);margin:0 -1px -1px 0;display:flex;flex-direction:column;gap:10px}
+.four h3{font-size:19px}
+.four p{color:var(--muted);font-size:15px}
+.four .key{margin-top:auto;padding-top:12px;font-size:13px;font-weight:600;color:var(--ink)}
+.scroll{overflow-x:auto}
+.cmp{width:100%;min-width:560px;border-collapse:collapse;border-top:1px solid var(--ink);background:var(--surface)}
+.cmp th,.cmp td{text-align:left;padding:16px 20px;border-bottom:1px solid var(--line);font-size:15px;vertical-align:top}
+.cmp thead th{font-size:16px}
+.cmp tbody th{width:130px;font-weight:600}
+.cmp td{color:var(--muted)}
+
+.band{padding:64px 0;background:var(--rack);color:var(--rack-ink)}
+.band .wrap{display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:space-between}
+.band h2{font-size:clamp(24px,3.2vw,34px);max-width:620px}
+.band .btn{background:#FF7A45;color:#1A0E08}
+
+footer{padding:40px 0 56px;font-size:14px;color:var(--muted)}
+footer .wrap{display:flex;flex-wrap:wrap;gap:16px 48px;justify-content:space-between}
+footer .logo{color:var(--ink);font-size:15px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap bar">
+    <a class="logo" href="#home" aria-label="PICKHUB home">
+      <span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i></span>PICKHUB
+    </a>
+    <nav aria-label="Main menu">
+      <a href="#home" data-nav="home">Home</a>
+      <a href="#about" data-nav="about">About</a>
+      <a href="#services" data-nav="services">Services</a>
+      <a href="#process" data-nav="process">Process</a>
+      <a href="#contact" data-nav="contact">Contact</a>
+      <a href="../index.html" lang="ko" hreflang="ko">한국어</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<!-- ================= Home ================= -->
+<div data-view="home" class="on">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="mono">AI Infrastructure · Consulting · System Integration</p>
+        <h1>AI servers, from <em>choosing the hardware</em> to running the workload.</h1>
+        <p class="lead">PICKHUB builds AI servers, advises on AI adoption, and delivers software integration with one team. From hardware selection to connecting your business systems, you deal with a single point of contact.</p>
+        <div class="cta">
+          <a class="btn" href="#contact">Request a consultation</a>
+          <a class="btn ghost" href="#services">See our services</a>
+        </div>
+      </div>
+
+      <div class="rack" aria-label="Example AI server rack layout">
+        <div class="rack-top"><span>RACK 01 · EXAMPLE LAYOUT</span><span>Select a unit</span></div>
+        <div class="units">
+          <button type="button" class="unit" aria-pressed="false" data-t="Network switch" data-d="We separate training traffic between nodes from storage traffic. Depending on the scale of the workload, we choose between high-speed Ethernet and InfiniBand."><span class="u">U42</span><span>Network switch</span><span class="leds" aria-hidden="true"><i></i><i></i><i></i></span></button>
+          <button type="button" class="unit tall" aria-pressed="true" data-t="GPU nodes" data-d="We start by asking whether the server is for training or inference, how large the models are, and how many people will use it at once. GPU type and count, memory, and power requirements follow from those answers."><span class="u">U30</span><span>GPU nodes 01–02</span><span class="leds" aria-hidden="true"><i></i><i></i><i class="amber"></i></span></button>
+          <button type="button" class="unit tall" aria-pressed="false" data-t="GPU nodes (expansion slots)" data-d="We do not fill the rack to its maximum on day one. We leave calculated headroom for power and cooling so that nodes can be added to the same rack as usage grows."><span class="u">U22</span><span>GPU nodes 03–04</span><span class="leds" aria-hidden="true"><i></i><i></i><i class="amber"></i></span></button>
+          <button type="button" class="unit" aria-pressed="false" data-t="Storage" data-d="Shared storage for datasets and model checkpoints. We size capacity and throughput together so that slow reads never leave the GPUs idle."><span class="u">U14</span><span>Storage</span><span class="leds" aria-hidden="true"><i></i><i></i></span></button>
+          <button type="button" class="unit" aria-pressed="false" data-t="Management node" data-d="Runs the job scheduler, container environment, user accounts, and monitoring. We set the policies that let several people share the GPUs without conflicts."><span class="u">U10</span><span>Management node</span><span class="leds" aria-hidden="true"><i></i><i></i></span></button>
+          <button type="button" class="unit" aria-pressed="false" data-t="Power · Cooling" data-d="GPU servers draw more power and produce more heat than ordinary servers. We check the electrical capacity and cooling at the site first, and propose alternatives if they fall short."><span class="u">U01</span><span>Power · Cooling</span><span class="leds" aria-hidden="true"><i></i></span></button>
+        </div>
+        <div class="rack-note" aria-live="polite"><b id="rackT">GPU nodes</b><span id="rackD">We start by asking whether the server is for training or inference, how large the models are, and how many people will use it at once. GPU type and count, memory, and power requirements follow from those answers.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="head">
+        <p class="mono">Services</p>
+        <h2>Infrastructure, direction, software. You do not need three vendors.</h2>
+      </div>
+      <div class="three">
+        <article>
+          <p class="mono">01 · Infrastructure</p>
+          <h3>AI Server Build</h3>
+          <p>We design GPU server specifications, select the hardware, install it, and set up the training and inference environment. We also build on-premises LLM servers that stay inside your network.</p>
+          <a href="#services">See what the build covers →</a>
+        </article>
+        <article>
+          <p class="mono">02 · Consulting</p>
+          <h3>AI Consulting</h3>
+          <p>Where to apply AI, whether to buy servers or rent them, which model fits: we settle these before you purchase anything, and confirm them with a small proof of concept.</p>
+          <a href="#services">See what consulting covers →</a>
+        </article>
+        <article>
+          <p class="mono">03 · System Integration</p>
+          <h3>System Integration</h3>
+          <p>We design and develop business systems, connect them to what you already run, migrate the data, and bring AI features into the screens your staff use every day.</p>
+          <a href="#services">See what development covers →</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="head">
+        <p class="mono">Workloads</p>
+        <h2>The right server depends on what you plan to run.</h2>
+        <p>With the same budget, a different purpose puts the money in a different place. A consultation starts by finding which of these four is closest to yours.</p>
+      </div>
+      <div class="four">
+        <article><h3>Internal document search · Work chatbots</h3><p>An LLM service that answers from your own documents. It is mostly inference rather than training, and is often kept on an internal network for security.</p><span class="key">Check first · GPU memory, concurrent users</span></article>
+        <article><h3>Video · Image analysis</h3><p>Reads camera feeds or inspection images in real time. It runs around the clock, so stability and power efficiency matter most.</p><span class="key">Check first · Number of streams, response time</span></article>
+        <article><h3>Model training · Fine-tuning</h3><p>Runs many GPUs together for long periods. Storage speed, node interconnect, and cooling shape the result as much as the GPUs do.</p><span class="key">Check first · Data volume, training cadence</span></article>
+        <article><h3>On-site · Edge AI</h3><p>Installed outside a server room, in a factory or a store. Size, noise, and temperature limits are decided before performance.</p><span class="key">Check first · Space, power, connectivity</span></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="head">
+        <p class="mono">How we work</p>
+        <h2>We do not run projects that end when the server is delivered.</h2>
+      </div>
+      <div class="rows">
+        <div class="row"><h3>We ask about the purpose first</h3><p>Before quoting hardware, we confirm what you will run. Specifications come from the workload, and every excess specification is a cost.</p></div>
+        <div class="row"><h3>We are not tied to one manufacturer</h3><p>We compare hardware and software against your requirements, and document why each option was chosen or rejected.</p></div>
+        <div class="row"><h3>One team covers hardware and software</h3><p>No gap in responsibility opens between a server vendor and a development vendor. When something fails, you call one place.</p></div>
+        <div class="row"><h3>We hand over to the people who will operate it</h3><p>We document the architecture, account policies, and incident procedures, and train your staff before handover.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <h2>You do not need a specification yet. Tell us what you want to run.</h2>
+      <a class="btn" href="#contact">Request a consultation</a>
+    </div>
+  </section>
+</div>
+
+<!-- ================= About ================= -->
+<div data-view="about">
+  <section class="page-top">
+    <div class="wrap">
+      <p class="mono">About</p>
+      <h1>We pick what fits and bring it together.</h1>
+      <p>The name says what we do. Among countless machines, models, and technologies, we pick the ones that fit the client (Pick), and connect scattered infrastructure and software into one (Hub).</p>
+    </div>
+  </section>
+  <section class="block">
+    <div class="wrap two">
+      <div class="prose">
+        <h2>So that AI adoption does not stop at buying hardware</h2>
+        <p>Many organisations buy GPU servers and cannot use them because the environment was never set up, or get a model running and cannot connect it to their business systems. When infrastructure and software go to different vendors, the space between them is easily left empty.</p>
+        <p>PICKHUB delivers AI server builds, consulting, and software integration together. We consider a project finished when the system is used in daily work, not when the server powers on.</p>
+      </div>
+      <div>
+        <table class="facts">
+          <tbody>
+            <tr><th scope="row">Business name</th><td>SUN</td></tr>
+            <tr><th scope="row">Brand</th><td>PICKHUB</td></tr>
+            <tr><th scope="row">Representative</th><td>Sunwoo Choi</td></tr>
+            <tr><th scope="row">Established</th><td>January 2025</td></tr>
+            <tr><th scope="row">Services</th><td>AI server build, AI consulting, system integration</td></tr>
+            <tr><th scope="row">Email</th><td><a href="mailto:admin@pickhub.site">admin@pickhub.site</a></td></tr>
+            <tr><th scope="row">Address</th><td>42 Hancheon-ro 46-gil, Dongdaemun-gu, Seoul, Republic of Korea</td></tr>
+            <tr><th scope="row">Business registration no.</th><td>177-09-03028</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  <section class="band">
+    <div class="wrap">
+      <h2>See what we do and how far each service goes.</h2>
+      <a class="btn" href="#services">See our services</a>
+    </div>
+  </section>
+</div>
+
+<!-- ================= Services ================= -->
+<div data-view="services">
+  <section class="page-top">
+    <div class="wrap">
+      <p class="mono">Services</p>
+      <h1>Three services, one team.</h1>
+      <p>Engage us for one of them, or carry on from consulting through build to development.</p>
+    </div>
+  </section>
+  <div class="wrap">
+    <section class="svc">
+      <div>
+        <p class="mono">01 · Infrastructure</p>
+        <h2>AI Server Build</h2>
+        <p class="desc">We design and install GPU servers for training and inference. The job is not done at power-on: we hand the system over ready to accept workloads.</p>
+      </div>
+      <ul class="list">
+        <li><b>Specification</b><span>Workload analysis, GPU, CPU, and memory sizing, hardware comparison and selection</span></li>
+        <li><b>Site</b><span>Rack layout, review of power capacity and cooling</span></li>
+        <li><b>Network · Storage</b><span>High-speed networking between nodes, shared storage</span></li>
+        <li><b>Software stack</b><span>OS, GPU drivers, containers, job scheduler</span></li>
+        <li><b>LLM serving</b><span>On-premises LLM inference servers that run inside your network</span></li>
+        <li><b>Operations</b><span>Monitoring, account and resource policies, documentation and training</span></li>
+      </ul>
+    </section>
+    <section class="svc" style="display:block">
+      <p class="mono">Before you build</p>
+      <h2>Is a workstation enough, or do you need a server?</h2>
+      <p class="desc" style="max-width:640px;margin-bottom:28px">A rack server is not always the answer. We sort the case by the criteria below first, and propose only what is needed.</p>
+      <div class="scroll">
+        <table class="cmp">
+          <thead><tr><th scope="col"><span class="mono">Criterion</span></th><th scope="col">GPU workstation</th><th scope="col">GPU server</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Location</th><td>Beside a desk in an office or lab</td><td>A rack in a server room or data centre</td></tr>
+            <tr><th scope="row">Usage</th><td>Used directly by one person or a small team</td><td>Shared by many users, running 24 hours a day</td></tr>
+            <tr><th scope="row">GPUs</th><td>One or two, for development and experiments</td><td>Several per machine, scaled by adding nodes</td></tr>
+            <tr><th scope="row">Power · Cooling</th><td>Standard outlets and room air conditioning</td><td>Dedicated electrical capacity and cooling</td></tr>
+            <tr><th scope="row">Operations</th><td>Managed by the user</td><td>Needs a scheduler, monitoring, and account policies</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <section class="svc">
+      <div>
+        <p class="mono">02 · Consulting</p>
+        <h2>AI Consulting</h2>
+        <p class="desc">We settle the decisions that should be made before you sign for hardware or a solution. You receive documents you can use directly to decide.</p>
+      </div>
+      <ul class="list">
+        <li><b>Adoption review</b><span>Which tasks to apply AI to, expected benefits and prerequisites</span></li>
+        <li><b>Capacity sizing</b><span>Resources required for your user count and model scale</span></li>
+        <li><b>Deployment options</b><span>Costs and constraints of cloud, on-premises, and hybrid setups</span></li>
+        <li><b>Model · Architecture</b><span>Open-source and commercial model comparison, service design such as RAG</span></li>
+        <li><b>Security</b><span>Configurations for air-gapped networks and restricted data environments</span></li>
+        <li><b>PoC</b><span>A small build first, to verify performance and practical value</span></li>
+      </ul>
+    </section>
+    <section class="svc">
+      <div>
+        <p class="mono">03 · System Integration</p>
+        <h2>System Integration</h2>
+        <p class="desc">We cover requirements, design, development, launch, and maintenance. Our strength is turning what runs on an AI server into screens people use at work.</p>
+      </div>
+      <ul class="list">
+        <li><b>Business systems</b><span>Design and development of internal systems and admin tools</span></li>
+        <li><b>Web · Mobile</b><span>Front end, back end, and API development</span></li>
+        <li><b>Integration · Migration</b><span>Connection to existing systems, database migration</span></li>
+        <li><b>AI features</b><span>Document search, work chatbots, and other AI features connected to existing systems</span></li>
+        <li><b>Maintenance</b><span>Incident response, improvements, and operational support after launch</span></li>
+      </ul>
+    </section>
+  </div>
+  <section class="band">
+    <div class="wrap">
+      <h2>We will help you define how much you actually need.</h2>
+      <a class="btn" href="#contact">Request a consultation</a>
+    </div>
+  </section>
+</div>
+
+<!-- ================= Process ================= -->
+<div data-view="process">
+  <section class="page-top">
+    <div class="wrap">
+      <p class="mono">Process</p>
+      <h1>Five stages, a document at each one.</h1>
+      <p>At the end of each stage you receive a deliverable, and we move on once you have confirmed it.</p>
+    </div>
+  </section>
+  <section class="block">
+    <div class="wrap">
+      <ol class="steps">
+        <li><span class="n">01</span><h3>Assessment</h3><p>We confirm the purpose, users, data, installation site, and budget range.</p><span class="out">Deliverable · Requirements</span></li>
+        <li><span class="n">02</span><h3>Design</h3><p>We fix the hardware specification and layout and compare alternatives. Quotes are itemised.</p><span class="out">Deliverable · Design document, quote</span></li>
+        <li><span class="n">03</span><h3>Build</h3><p>Hardware installation, environment setup, and software development proceed on schedule.</p><span class="out">Deliverable · Weekly progress report</span></li>
+        <li><span class="n">04</span><h3>Verification</h3><p>We test performance and stability with real workloads and fix what falls short.</p><span class="out">Deliverable · Test report</span></li>
+        <li><span class="n">05</span><h3>Handover</h3><p>We deliver the operating documents and train your staff. Maintenance continues from here.</p><span class="out">Deliverable · Operations manual</span></li>
+      </ol>
+    </div>
+  </section>
+  <section class="band">
+    <div class="wrap">
+      <h2>The first stage is a conversation. Tell us the purpose and we start with the assessment.</h2>
+      <a class="btn" href="#contact">Request a consultation</a>
+    </div>
+  </section>
+</div>
+
+<!-- ================= Contact ================= -->
+<div data-view="contact">
+  <section class="page-top">
+    <div class="wrap">
+      <p class="mono">Contact</p>
+      <h1>Tell us what you want to run.</h1>
+      <p>You do not need a specification or a budget yet. Write what you know and we will get back to you.</p>
+    </div>
+  </section>
+  <section class="block">
+    <div class="wrap two">
+      <div>
+        <form id="inq" novalidate>
+          <div class="pair">
+            <div class="field"><label for="f-company">Company</label><input id="f-company" name="company" autocomplete="organization" required></div>
+            <div class="field"><label for="f-name">Name</label><input id="f-name" name="name" autocomplete="name" required></div>
+          </div>
+          <div class="pair">
+            <div class="field"><label for="f-email">Email</label><input id="f-email" name="email" type="email" autocomplete="email" required></div>
+            <div class="field"><label for="f-tel">Phone</label><input id="f-tel" name="tel" type="tel" autocomplete="tel"></div>
+          </div>
+          <div class="field"><label for="f-type">Service</label>
+            <select id="f-type" name="type">
+              <option>AI server build</option><option>AI consulting</option><option>System integration</option><option>Not sure yet</option>
+            </select>
+          </div>
+          <div class="field"><label for="f-msg">Message</label><textarea id="f-msg" name="msg" placeholder="Example: We want an LLM for internal document search on our own network, for about 50 users." required></textarea></div>
+          <p class="hint" id="f-err" role="alert"></p>
+          <div><button class="btn" type="submit">Prepare my inquiry</button></div>
+        </form>
+        <div class="result" id="result">
+          <p><b>Your inquiry is ready.</b> Copy the text below and send it to <a href="mailto:contact@pickhub.site">contact@pickhub.site</a>.</p>
+          <pre id="resultText"></pre>
+          <div><button class="btn ghost" type="button" id="copyBtn">Copy text</button></div>
+        </div>
+      </div>
+      <div>
+        <table class="facts">
+          <tbody>
+            <tr><th scope="row">Inquiries</th><td><a href="mailto:contact@pickhub.site">contact@pickhub.site</a></td></tr>
+            <tr><th scope="row">Address</th><td>42 Hancheon-ro 46-gil, Dongdaemun-gu, Seoul, Republic of Korea</td></tr>
+            <tr><th scope="row">Hours</th><td>09:00 – 18:00 (KST)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="logo" href="#home"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i></span>PICKHUB</a>
+    <span>AI Server Build · AI Consulting · System Integration</span>
+    <span>SUN · Representative Sunwoo Choi · 42 Hancheon-ro 46-gil, Dongdaemun-gu, Seoul · contact@pickhub.site · Business registration no. 177-09-03028</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  document.documentElement.classList.add('js');
+  var views=['home','about','services','process','contact'];
+  function show(){
+    var h=(location.hash||'').replace('#','');
+    if(views.indexOf(h)<0) h='home';
+    document.querySelectorAll('[data-view]').forEach(function(v){v.classList.toggle('on',v.getAttribute('data-view')===h)});
+    document.querySelectorAll('[data-nav]').forEach(function(a){
+      if(a.getAttribute('data-nav')===h) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
+    });
+    window.scrollTo(0,0);
+  }
+  window.addEventListener('hashchange',show);
+  show();
+
+  var units=document.querySelectorAll('.unit'),t=document.getElementById('rackT'),d=document.getElementById('rackD');
+  units.forEach(function(u){u.addEventListener('click',function(){
+    units.forEach(function(x){x.setAttribute('aria-pressed','false')});
+    u.setAttribute('aria-pressed','true');
+    t.textContent=u.getAttribute('data-t'); d.textContent=u.getAttribute('data-d');
+  })});
+
+  var form=document.getElementById('inq'),err=document.getElementById('f-err'),res=document.getElementById('result'),out=document.getElementById('resultText'),copy=document.getElementById('copyBtn');
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var f=form.elements;
+    if(!f.company.value.trim()||!f.name.value.trim()||!f.email.value.trim()||!f.msg.value.trim()){
+      err.textContent='Please fill in company, name, email, and message.'; res.classList.remove('on'); return;
+    }
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email.value.trim())){
+      err.textContent='Please check the email address.'; res.classList.remove('on'); return;
+    }
+    err.textContent='';
+    out.textContent='[PICKHUB inquiry]\nCompany: '+f.company.value.trim()+'\nName: '+f.name.value.trim()+'\nEmail: '+f.email.value.trim()+'\nPhone: '+(f.tel.value.trim()||'-')+'\nService: '+f.type.value+'\n\n'+f.msg.value.trim();
+    res.classList.add('on');
+    copy.textContent='Copy text';
+  });
+  copy.addEventListener('click',function(){
+    try{
+      navigator.clipboard.writeText(out.textContent).then(function(){copy.textContent='Copied'},function(){copy.textContent='Could not copy. Please select the text and copy it manually.'});
+    }catch(e){copy.textContent='Could not copy. Please select the text and copy it manually.'}
+  });
+})();
+</script>
+</body>
+</html>
