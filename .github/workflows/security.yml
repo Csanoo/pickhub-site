@@ -1,0 +1,83 @@
+name: security
+
+# 자동배포(Vercel Git 연동)에 붙는 보안 점검.
+# - security-review: main 푸시·PR마다 실행. Vercel 프로젝트의 Deployment Checks에
+#   이 잡을 필수로 등록하면, 실패한 커밋은 pickhub.site로 승격되지 않는다.
+# - live-check: 운영 배포 완료 후(Vercel deployment_status)와 매주 월요일에 실제
+#   사이트의 보안 헤더·노출 경로를 확인하고 ZAP 기본 스캔 보고서를 남긴다.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  deployment_status:
+  schedule:
+    - cron: "17 0 * * 1" # 매주 월 09:17 KST
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  security-review:
+    if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 비밀정보 스캔은 전체 이력을 본다
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 정적 보안 점검 (HTML·JS·민감파일·보안 헤더 설정)
+        run: python3 scripts/security_check.py
+
+      - name: 비밀정보 유출 스캔 (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: false
+
+  live-check:
+    if: >-
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'deployment_status' &&
+       github.event.deployment_status.state == 'success' &&
+       github.event.deployment.environment == 'Production')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SITE_URL: ${{ vars.SITE_URL || 'https://pickhub.site' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 배포 사이트 보안 헤더·노출 경로 점검
+        # 배포 직후 도메인 반영이 늦을 수 있어 최대 5분 재시도
+        run: python3 scripts/check_live_headers.py "$SITE_URL" --wait 300
+
+      - name: OWASP ZAP 기본 스캔 (보고서만, 실패 처리 안 함)
+        if: always()
+        run: |
+          mkdir -p zap && chmod 777 zap
+          docker run --rm -v "$PWD/zap:/zap/wrk:rw" ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py -t "$SITE_URL" -r zap-report.html -J zap-report.json -I || true
+
+      - name: ZAP 보고서 업로드
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-report
+          path: zap/
+          retention-days: 30
