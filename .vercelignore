@@ -1,0 +1,7 @@
+# 배포물에서 제외 (사이트에 공개될 필요 없는 파일)
+.github
+scripts
+*.md
+.env*
+*.pem
+*.key

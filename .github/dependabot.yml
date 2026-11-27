@@ -1,0 +1,7 @@
+version: 2
+updates:
+  # 워크플로에서 쓰는 GitHub Actions 버전의 보안 업데이트를 PR로 받는다
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
